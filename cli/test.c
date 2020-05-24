@@ -48,7 +48,7 @@
 #define GPIO_1        6
 #define GPIO_2        7
 #define GPIO_SD       5
-#define GPIO_LED      2
+#define GPIO_LED      0
 
 /*- Implementations ---------------------------------------------------------*/
 
@@ -149,7 +149,7 @@ static void gpio_test(void)
   printf("--- GPIO Test ---\n");
 
   // GPIO
-  gpio_configure(GPIO_1, GPIO_CONF_OUTPUT | GPIO_CONF_SET);
+  /*gpio_configure(GPIO_1, GPIO_CONF_OUTPUT | GPIO_CONF_SET);
   gpio_configure(GPIO_2, GPIO_CONF_INPUT | GPIO_CONF_PULLUP);
 
   gpio_write(GPIO_1, 1);
@@ -158,7 +158,7 @@ static void gpio_test(void)
   gpio_write(GPIO_1, 0);
   shorted &= (0 == gpio_read(GPIO_2));
 
-  printf("GPIO 1 and 2 are %s\n", shorted ? "shorted" : "open");
+  printf("GPIO 1 and 2 are %s\n", shorted ? "shorted" : "open");*/
 
   // LED
   verbose("Blinking an LED... ");
@@ -342,11 +342,11 @@ static void pwm_test(void)
 //-----------------------------------------------------------------------------
 void test(void)
 {
-  eeprom_test();
-  temp_test();
+  //eeprom_test();
+  //temp_test();
   gpio_test();
-  sd_card_test();
-  adc_dac_test();
-  pwm_test();
+  //sd_card_test();
+  //adc_dac_test();
+  //pwm_test();
 }
 
