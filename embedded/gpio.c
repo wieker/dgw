@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "samd21.h"
+#include "samd11.h"
 #include "hal_gpio.h"
 #include "gpio.h"
 

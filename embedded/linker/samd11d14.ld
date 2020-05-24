@@ -26,40 +26,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*- Includes ----------------------------------------------------------------*/
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "samd11.h"
-#include "hal_gpio.h"
-#include "dac.h"
-
-/*- Definitions -------------------------------------------------------------*/
-HAL_GPIO_PIN(DAC,      A, 2)
-
-/*- Implementations ---------------------------------------------------------*/
-
-//-----------------------------------------------------------------------------
-void dac_init(void)
+MEMORY
 {
-  HAL_GPIO_DAC_out();
-  HAL_GPIO_DAC_pmuxen(HAL_GPIO_PMUX_B);
-
-  PM->APBCMASK.reg |= PM_APBCMASK_DAC;
-
-  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(DAC_GCLK_ID) |
-    GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN(0);
-
-  DAC->CTRLA.reg = DAC_CTRLA_SWRST;
-  while (DAC->CTRLA.reg & DAC_CTRLA_SWRST);
-
-  DAC->CTRLB.reg = DAC_CTRLB_EOEN | DAC_CTRLB_REFSEL_AVCC;
-  DAC->CTRLA.reg = DAC_CTRLA_ENABLE;
+  flash (rx) : ORIGIN = 0x00000000, LENGTH = 0x4000 /* 16k */
+  ram  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x1000 /* 4k */
 }
 
-//-----------------------------------------------------------------------------
-void dac_write(int value)
+__top_flash = ORIGIN(flash) + LENGTH(flash);
+__top_ram = ORIGIN(ram) + LENGTH(ram);
+
+ENTRY(irq_handler_reset)
+
+SECTIONS
 {
-  DAC->DATA.reg = value;
+  .text : ALIGN(4)
+  {
+    FILL(0xff)
+    KEEP(*(.vectors))
+    *(.text*)
+    *(.rodata)
+    *(.rodata.*)
+    . = ALIGN(4);
+  } > flash
+
+  . = ALIGN(4);
+  _etext = .;
+
+  .uninit_RESERVED : ALIGN(4)
+  {
+    KEEP(*(.bss.$RESERVED*))
+  } > ram
+
+  .data : ALIGN(4)
+  {
+    FILL(0xff)
+    _data = .;
+    *(.ramfunc .ramfunc.*);
+    *(vtable)
+    *(.data*)
+    . = ALIGN(4);
+    _edata = .;
+  } > ram AT > flash
+
+  .bss : ALIGN(4)
+  {
+    _bss = .;
+    *(.bss*)
+    *(COMMON)
+    . = ALIGN(4);
+    _ebss = .;
+    PROVIDE(_end = .);
+  } > ram
+
+  PROVIDE(_stack_top = __top_ram - 0);
 }
 

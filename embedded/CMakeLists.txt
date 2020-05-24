@@ -49,4 +49,4 @@ add_executable(samd11_mcu
         ../udc.c
         ../usb.c
         ../usb_descriptors.c
-        ../startup_samd21.c)
+        ../startup_samd11.c)

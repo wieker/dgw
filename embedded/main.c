@@ -32,7 +32,7 @@
 #include <stdbool.h>
 #include <stdalign.h>
 #include <string.h>
-#include "samd21.h"
+#include "samd11.h"
 #include "hal_gpio.h"
 #include "nvm_data.h"
 #include "debug.h"
@@ -89,35 +89,35 @@ static alignas(4) uint8_t app_response_buffer[64];
 /*- Implementations ---------------------------------------------------------*/
 
 //-----------------------------------------------------------------------------
-void irq_handler_tc3(void)
+void irq_handler_tc1(void)
 {
-  if (TC3->COUNT16.INTFLAG.reg & TC_INTFLAG_MC(1))
+  if (TC1->COUNT16.INTFLAG.reg & TC_INTFLAG_MC(1))
   {
     HAL_GPIO_LED_toggle();
-    TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC(1);
+    TC1->COUNT16.INTFLAG.reg = TC_INTFLAG_MC(1);
   }
 }
 
 //-----------------------------------------------------------------------------
 static void timer_init(void)
 {
-  PM->APBCMASK.reg |= PM_APBCMASK_TC3;
+  PM->APBCMASK.reg |= PM_APBCMASK_TC1;
 
-  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(TC3_GCLK_ID) |
+  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(TC1_GCLK_ID) |
       GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN(0);
 
-  TC3->COUNT16.CTRLA.reg = TC_CTRLA_MODE_COUNT16 | TC_CTRLA_WAVEGEN_MFRQ |
+  TC1->COUNT16.CTRLA.reg = TC_CTRLA_MODE_COUNT16 | TC_CTRLA_WAVEGEN_MFRQ |
       TC_CTRLA_PRESCALER_DIV1024 | TC_CTRLA_PRESCSYNC_RESYNC;
 
-  TC3->COUNT16.COUNT.reg = 0;
+  TC1->COUNT16.COUNT.reg = 0;
 
-  TC3->COUNT16.CC[0].reg = (F_CPU / 1000ul / 1024) * 500;
-  TC3->COUNT16.COUNT.reg = 0;
+  TC1->COUNT16.CC[0].reg = (F_CPU / 1000ul / 1024) * 500;
+  TC1->COUNT16.COUNT.reg = 0;
 
-  TC3->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
+  TC1->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
 
-  TC3->COUNT16.INTENSET.reg = TC_INTENSET_MC(1);
-  NVIC_EnableIRQ(TC3_IRQn);
+  TC1->COUNT16.INTENSET.reg = TC_INTENSET_MC(1);
+  NVIC_EnableIRQ(TC1_IRQn);
 }
 
 //-----------------------------------------------------------------------------
