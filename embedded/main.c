@@ -43,6 +43,7 @@
 #include "gpio.h"
 #include "i2c_master.h"
 #include "spi_master.h"
+#include "uart.h"
 
 /*- Definitions -------------------------------------------------------------*/
 HAL_GPIO_PIN(LED,      B, 30)
@@ -361,9 +362,8 @@ int main(void)
 {
   sys_init();
   timer_init();
-  debug_init();
 
-  debug_puts("\r\n--- start ---\r\n");
+  uart_init();
 
   usb_init();
   gpio_init();
