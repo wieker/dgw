@@ -92,7 +92,7 @@ int dgw_enumerate(dgw_t *dgws, int size)
       dgws[rsize].vid = strtol(udev_device_get_sysattr_value(parent, "idVendor"), NULL, 16);
       dgws[rsize].pid = strtol(udev_device_get_sysattr_value(parent, "idProduct"), NULL, 16);
 
-      if (strstr(dgws[rsize].product, "Data Gateway"))
+      if (strstr(dgws[rsize].product, "Combined VCP and CMSIS-DAP Adapter"))
         rsize++;
     }
 

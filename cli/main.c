@@ -50,12 +50,14 @@ static const struct option long_options[] =
   { "verbose",   no_argument,        0, 'b' },
   { "list",      no_argument,        0, 'l' },
   { "serial",    required_argument,  0, 's' },
+  { "path",    required_argument,  0, 'p' },
   { 0, 0, 0, 0 }
 };
 
-static const char *short_options = "hbls:";
+static const char *short_options = "hblsp:";
 
 static char *g_serial = NULL;
+static char *g_path = NULL;
 static bool g_list = false;
 static bool g_verbose = true; // TODO: false
 
@@ -157,6 +159,7 @@ static void print_help(char *name)
   printf("  -b, --verbose              print verbose messages\n");
   printf("  -l, --list                 list all available gateways\n");
   printf("  -s, --serial <number>      use a gateway with a specified serial number\n");
+  printf("  -p, --path   <path>        use a gateway with a specified HIDraw path\n");
   exit(0);
 }
 
@@ -174,6 +177,7 @@ static void parse_command_line(int argc, char **argv)
       case 'b': g_verbose = true; break;
       case 'l': g_list = true; break;
       case 's': g_serial = optarg; break;
+      case 'p': g_path = optarg; break;
       default: exit(1); break;
     }
   }
@@ -196,24 +200,39 @@ int main(int argc, char **argv)
   {
     printf("Attached data gateways:\n");
     for (int i = 0; i < n_dgws; i++)
-      printf("  %s - %s %s\n", dgws[i].serial, dgws[i].manufacturer, dgws[i].product);
+      printf("  %s - %s %s %s\n", dgws[i].serial, dgws[i].manufacturer, dgws[i].path, dgws[i].product);
     return 0;
   }
 
-  if (g_serial)
-  {
-    for (int i = 0; i < n_dgws; i++)
+    if (g_serial)
     {
-      if (0 == strcmp(dgws[i].serial, g_serial))
-      {
-        dgw = i;
-        break;
-      }
+        for (int i = 0; i < n_dgws; i++)
+        {
+            if (0 == strcmp(dgws[i].serial, g_serial))
+            {
+                dgw = i;
+                break;
+            }
+        }
+
+        if (-1 == dgw)
+            error_exit("unable to find a gateway with a specified serial number");
     }
 
-    if (-1 == dgw)
-      error_exit("unable to find a gateway with a specified serial number");
-  }
+    if (g_path)
+    {
+        for (int i = 0; i < n_dgws; i++)
+        {
+            if (0 == strcmp(dgws[i].path, g_path))
+            {
+                dgw = i;
+                break;
+            }
+        }
+
+        if (-1 == dgw)
+            error_exit("unable to find a gateway with a specified hidraw path");
+    }
 
   if (0 == n_dgws)
     error_exit("no gateways found");
