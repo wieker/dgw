@@ -48,7 +48,7 @@
 #define GPIO_1        6
 #define GPIO_2        7
 #define GPIO_SD       5
-#define GPIO_LED      0
+#define GPIO_LED      1
 
 /*- Implementations ---------------------------------------------------------*/
 
