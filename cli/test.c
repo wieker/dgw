@@ -261,14 +261,15 @@ static void sd_card_test(void)
 
   printf("--- SD Card Test ---\n");
 
-  spi_init(8000000, 0);
+  spi_init(8000000, 3);
     spi_ss(0);
-    spi_ss(1);
     printf("--- SD Card Test ---\n");
     gpio_write(GPIO_LED, 0);
     printf("--- SD Card Test ---\n");
-    uint8_t data[] = { 0x9F, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    uint8_t data_wake[] = { 0xAB, 0x00, 0x00, 0x00, 0x00, 0x00 };
     uint8_t result[6];
+    spi_transfer(data_wake, result, 6);
+    uint8_t data[] = { 0x9F, 0x00, 0x00, 0x00, 0x00, 0x00 };
     spi_transfer(data, result, 6);
     printf("--- SD Card Test ---\n");
     for (int i = 0; i < 6; i++) {
@@ -276,7 +277,7 @@ static void sd_card_test(void)
     }
     printf("\r\n");
     spi_ss(1);
-  gpio_write(GPIO_LED, 1);
+  //gpio_write(GPIO_LED, 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -311,7 +312,7 @@ void test(void)
 {
   //eeprom_test();
   //temp_test();
-  gpio_test();
+  //gpio_test();
   sd_card_test();
   //adc_dac_test();
   //pwm_test();
