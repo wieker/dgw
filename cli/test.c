@@ -262,54 +262,21 @@ static void sd_card_test(void)
   printf("--- SD Card Test ---\n");
 
   spi_init(8000000, 0);
-
-  gpio_configure(GPIO_SD, GPIO_CONF_INPUT | GPIO_CONF_PULLUP);
-
-  inserted = !gpio_read(GPIO_SD);
-
-  printf("SD Card is %s\n", inserted ? "inserted" : "not inserted");
-
-  if (inserted)
-  {
-    uint8_t cid[16];
-
-    sdc_prepare();
-
-    sdc_command(10/*SDC_SEND_CID*/, 0);
-
-    while (0x00 != spi_write_byte(0xff));
-    while (0xfe != spi_write_byte(0xfe));
-
-    memset(cid, 0xff, sizeof(cid));
-    spi_transfer(cid, cid, sizeof(cid));
-
-    if (sdc_crc7(cid, 15) == cid[15])
-    {
-      char name[6];
-      uint32_t sn;
-      int date;
-
-      strncpy(name, (char *)&cid[3], 5);
-
-      sn = ((uint32_t)cid[9] << 24) | ((uint32_t)cid[10] << 16) | ((uint32_t)cid[11] << 8) | cid[12];
-      date = ((uint16_t)cid[13] << 8) | cid[14];
-
-      printf("Manufacturer ID  : 0x%02x\n", cid[0]);
-      printf("Application ID   : %c%c\n", cid[1], cid[2]);
-      printf("Product Name     : %s\n", name);
-      printf("Product Revision : %d.%d\n", cid[8] / 16, cid[8] % 16);
-      printf("Product S/N      : 0x%08x\n", sn);
-      printf("Manufacture Date : %d / %d\n", date % 16, 2000 + date / 16);
-    }
-    else
-    {
-      printf("CID response CRC fail\n");
-    }
-
+    spi_ss(0);
     spi_ss(1);
-  }
-
-  printf("\n");
+    printf("--- SD Card Test ---\n");
+    gpio_write(GPIO_LED, 0);
+    printf("--- SD Card Test ---\n");
+    uint8_t data[] = { 0x9F, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    uint8_t result[6];
+    spi_transfer(data, result, 6);
+    printf("--- SD Card Test ---\n");
+    for (int i = 0; i < 6; i++) {
+        printf(" %02X", result[i]);
+    }
+    printf("\r\n");
+    spi_ss(1);
+  gpio_write(GPIO_LED, 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -345,7 +312,7 @@ void test(void)
   //eeprom_test();
   //temp_test();
   gpio_test();
-  //sd_card_test();
+  sd_card_test();
   //adc_dac_test();
   //pwm_test();
 }
