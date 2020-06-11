@@ -48,9 +48,12 @@
 #define GPIO_1        6
 #define GPIO_2        7
 #define GPIO_SD       5
-#define GPIO_LED      1
+#define GPIO_LED      0
+#define GPIO_RST      1
 
 /*- Implementations ---------------------------------------------------------*/
+
+void out(const uint8_t *result);
 
 //-----------------------------------------------------------------------------
 static void eeprom_test(void)
@@ -257,27 +260,36 @@ static void sdc_prepare(void)
 //-----------------------------------------------------------------------------
 static void sd_card_test(void)
 {
-  bool inserted;
+    gpio_configure(GPIO_LED, GPIO_CONF_OUTPUT | GPIO_CONF_CLR);
+    gpio_configure(GPIO_RST, GPIO_CONF_OUTPUT | GPIO_CONF_CLR);
+    gpio_write(GPIO_RST, 0);
+    gpio_write(GPIO_LED, 1);
 
-  printf("--- SD Card Test ---\n");
-
-  spi_init(8000000, 3);
-    spi_ss(0);
-    printf("--- SD Card Test ---\n");
-    gpio_write(GPIO_LED, 0);
-    printf("--- SD Card Test ---\n");
-    uint8_t data_wake[] = { 0xAB, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    spi_init(8000000, 2);
     uint8_t result[6];
+
+    uint8_t data_wake[] = { 0xAB, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    spi_ss(0);
     spi_transfer(data_wake, result, 6);
+    spi_ss(1);
+    out(result);
+
     uint8_t data[] = { 0x9F, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    spi_ss(0);
     spi_transfer(data, result, 6);
+    spi_ss(1);
+    out(result);
+
+    gpio_write(GPIO_LED, 0);
+    //gpio_write(GPIO_RST, 1);
+}
+
+void out(const uint8_t *result) {
     printf("--- SD Card Test ---\n");
     for (int i = 0; i < 6; i++) {
         printf(" %02X", result[i]);
     }
     printf("\r\n");
-    spi_ss(1);
-  //gpio_write(GPIO_LED, 1);
 }
 
 //-----------------------------------------------------------------------------
