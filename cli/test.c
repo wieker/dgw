@@ -281,7 +281,7 @@ static void sd_card_test(void)
     out(result);
 
     gpio_write(GPIO_LED, 0);
-    //gpio_write(GPIO_RST, 1);
+    gpio_write(GPIO_RST, 1);
 }
 
 void out(const uint8_t *result) {
