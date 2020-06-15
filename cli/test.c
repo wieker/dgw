@@ -265,7 +265,7 @@ static void sd_card_test(void)
     gpio_write(GPIO_RST, 0);
     gpio_write(GPIO_LED, 1);
 
-    spi_init(8000000, 2);
+    spi_init(8000000, 0);
     uint8_t result[6];
 
     uint8_t data_wake[] = { 0xAB, 0x00, 0x00, 0x00, 0x00, 0x00 };
