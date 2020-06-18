@@ -196,11 +196,11 @@ int main(int argc, char **argv)
 
   n_dgws = dgw_enumerate(dgws, 10);
 
-  if (g_list)
-  {
     printf("Attached data gateways:\n");
     for (int i = 0; i < n_dgws; i++)
-      printf("  %s - %s %s %s\n", dgws[i].serial, dgws[i].manufacturer, dgws[i].path, dgws[i].product);
+        printf("  %s - %s %s %s\n", dgws[i].serial, dgws[i].manufacturer, dgws[i].path, dgws[i].product);
+  if (g_list)
+  {
     return 0;
   }
 
