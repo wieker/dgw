@@ -53,7 +53,13 @@
 
 /*- Implementations ---------------------------------------------------------*/
 
-void out(const uint8_t *result);
+void out(const uint8_t *result, int length);
+
+void spi_wait(const uint8_t *result);
+
+void spi_erase(const uint8_t *result);
+
+void spi_we(const uint8_t *result);
 
 //-----------------------------------------------------------------------------
 static void eeprom_test(void)
@@ -272,21 +278,53 @@ static void sd_card_test(void)
     spi_ss(0);
     spi_transfer(data_wake, result, 6);
     spi_ss(1);
-    out(result);
+    out(result, 6);
 
     uint8_t data[] = { 0x9F, 0x00, 0x00, 0x00, 0x00, 0x00 };
     spi_ss(0);
     spi_transfer(data, result, 6);
     spi_ss(1);
-    out(result);
+    out(result, 6);
+
+    spi_wait(result);
+
+    spi_we(result);
+
+    spi_wait(result);
+
+    spi_erase(result);
 
     gpio_write(GPIO_LED, 0);
     gpio_write(GPIO_RST, 1);
 }
 
-void out(const uint8_t *result) {
+void spi_we(const uint8_t *result) {
+    uint8_t data_we[] = {0x06 };
+    spi_ss(0);
+    spi_transfer(data_we, result, 1);
+    spi_ss(1);
+    out(result, 1);
+}
+
+void spi_erase(const uint8_t *result) {
+    uint8_t data_erase[] = {0xC7 };
+    spi_ss(0);
+    spi_transfer(data_erase, result, 1);
+    spi_ss(1);
+    out(result, 1);
+}
+
+void spi_wait(const uint8_t *result) {
+    uint8_t data_wait[] = {0x05, 0x00 };
+    spi_ss(0);
+    spi_transfer(data_wait, result, 2);
+    spi_ss(1);
+    out(result, 2);
+}
+
+void out(const uint8_t *result, int length) {
     printf("--- SD Card Test ---\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < length; i++) {
         printf(" %02X", result[i]);
     }
     printf("\r\n");
