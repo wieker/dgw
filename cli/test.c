@@ -55,7 +55,7 @@
 
 void out(const uint8_t *result, int length);
 
-void spi_wait(const uint8_t *result);
+void spi_wait(const uint8_t *result, uint8_t mask);
 
 void spi_erase(const uint8_t *result);
 
@@ -286,13 +286,15 @@ static void sd_card_test(void)
     spi_ss(1);
     out(result, 6);
 
-    spi_wait(result);
+    spi_wait(result, 0x00);
 
     spi_we(result);
 
-    spi_wait(result);
+    spi_wait(result, 0x02);
 
     spi_erase(result);
+
+    spi_wait(result, 0x00);
 
     gpio_write(GPIO_LED, 0);
     gpio_write(GPIO_RST, 1);
@@ -314,12 +316,17 @@ void spi_erase(const uint8_t *result) {
     out(result, 1);
 }
 
-void spi_wait(const uint8_t *result) {
+void spi_wait(const uint8_t *result, uint8_t mask) {
     uint8_t data_wait[] = {0x05, 0x00 };
-    spi_ss(0);
-    spi_transfer(data_wait, result, 2);
-    spi_ss(1);
-    out(result, 2);
+    while (1) {
+        spi_ss(0);
+        spi_transfer(data_wait, result, 2);
+        spi_ss(1);
+        out(result, 2);
+        if (result[1] == mask) {
+            break;
+        }
+    }
 }
 
 void out(const uint8_t *result, int length) {
