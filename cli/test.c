@@ -274,7 +274,7 @@ static void sd_card_test(void)
     gpio_write(GPIO_LED, 1);
 
     spi_init(8000000, 0);
-    uint8_t result[6];
+    uint8_t result[512];
 
     uint8_t data_wake[] = { 0xAB, 0x00, 0x00, 0x00, 0x00, 0x00 };
     spi_ss(0);
@@ -288,7 +288,7 @@ static void sd_card_test(void)
     spi_ss(1);
     out(result, 6);
 
-    spi_wait(result, 0x00);
+    //spi_wait(result, 0x00);
 
     spi_we(result);
 
@@ -303,8 +303,9 @@ static void sd_card_test(void)
     int read_size = 32220;
 
     printf("starting write\n");
+    int addr = 0;
 
-    for (int addr = 0; addr < read_size; addr += 16) {
+    while (1) {
 
         printf("iter %x\n", addr);
 
@@ -324,8 +325,13 @@ static void sd_card_test(void)
         printf("iter finishing..\n");
 
         spi_wait(result, 0x00);
+        addr += 16;
 
-        printf("iter done\n");
+        if (addr > read_size) {
+            break;
+        }
+
+        printf("iter done %x\n", addr);
     }
     fclose(f);
 
