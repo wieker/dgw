@@ -61,6 +61,8 @@ void spi_erase(const uint8_t *result);
 
 void spi_we(const uint8_t *result);
 
+void spi_write(const uint8_t *result, const uint8_t *data, int size);
+
 //-----------------------------------------------------------------------------
 static void eeprom_test(void)
 {
@@ -296,8 +298,46 @@ static void sd_card_test(void)
 
     spi_wait(result, 0x00);
 
+    FILE *f = fopen("spidump", "rb");
+    uint8_t buf[256];
+    int read_size = 32220;
+
+    printf("starting write\n");
+
+    for (int addr = 0; addr < read_size; addr += 16) {
+
+        printf("iter %x\n", addr);
+
+        spi_we(result);
+
+        spi_wait(result, 0x02);
+
+        buf[0] = 0x02;
+        buf[1] = (addr >> 16) & 0xFF;
+        buf[2] = (addr >> 8) & 0xFF;
+        buf[3] = (addr >> 0) & 0xFF;
+
+        int new_len = read_size - addr > 16 ? 16 : read_size - addr;
+        fread(buf + 4, new_len, 1, f);
+        spi_write(result, buf, new_len + 4);
+        usleep(1000);
+        printf("iter finishing..\n");
+
+        spi_wait(result, 0x00);
+
+        printf("iter done\n");
+    }
+    fclose(f);
+
     gpio_write(GPIO_LED, 0);
     gpio_write(GPIO_RST, 1);
+}
+
+void spi_write(const uint8_t *result, const uint8_t *data, int size) {
+    spi_ss(0);
+    spi_transfer(data, result, size);
+    spi_ss(1);
+    out(result, size);
 }
 
 void spi_we(const uint8_t *result) {
@@ -326,6 +366,7 @@ void spi_wait(const uint8_t *result, uint8_t mask) {
         if (result[1] == mask) {
             break;
         }
+        usleep(1000);
     }
 }
 
